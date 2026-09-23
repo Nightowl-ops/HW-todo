@@ -28,4 +28,14 @@ public class CategoryController {
     public Category getCategory(@PathVariable Long categoryId) {
         return categoryService.getCategory(categoryId);
     }
+
+    @PutMapping("/{categoryId}")
+    public Category updateCategory(@PathVariable Long categoryId, @RequestBody Category categoryObject) {
+        return categoryService.updateCategory(categoryId, categoryObject);
+    }
+
+    @DeleteMapping("/{categoryId}")
+    public Category deleteCategory(@PathVariable Long categoryId) {
+        return categoryService.deleteCategory(categoryId);
+    }
 }
