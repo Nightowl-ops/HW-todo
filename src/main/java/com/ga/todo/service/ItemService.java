@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -18,50 +17,59 @@ public class ItemService {
     private ItemRepository itemRepository;
     private CategoryRepository categoryRepository;
 
-    // 1. create
-    public Item createItem(Long categoryId, Item item) {
-        Category category = categoryRepository.findById(categoryId).orElseThrow(
+    private Category findCategory(Long categoryId) {
+        return categoryRepository.findById(categoryId).orElseThrow(
                 () -> new InformationNotFoundException("Category with id " + categoryId + " not found")
         );
+    }
+
+    // 1. create
+    public Item createItem(Long categoryId, Item item) {
+        System.out.println("Service calling createItem ==>");
+        Category category = findCategory(categoryId);
         item.setCategory(category);
         return itemRepository.save(item);
     }
 
-    // 2.readall
+    // 2. read all
     public List<Item> getItems(Long categoryId) {
-        System.out.println("service calling getItems ==>");
+        System.out.println("Service calling getItems ==>");
+        findCategory(categoryId);
         return itemRepository.findByCategoryId(categoryId);
     }
 
-    // 3. readone
+    // 3. read one
     public Item getItem(Long categoryId, Long itemId) {
-        System.out.println("service calling getItem ==>");
-        Optional<Item> item = itemRepository.findById(itemId);
-        return item.orElse(null);
+        System.out.println("Service calling getItem ==>");
+        findCategory(categoryId);
+        return itemRepository.findByIdAndCategoryId(itemId, categoryId)
+                .orElseThrow(() -> new InformationNotFoundException(
+                        "Item with id " + itemId + " not found in category " + categoryId));
     }
 
     // 4. delete
     public Item deleteItem(Long categoryId, Long itemId) {
-        System.out.println("service calling deleteItem ==>");
-        Optional<Item> item = itemRepository.findById(itemId);
-        if (item.isPresent()) {
-            itemRepository.deleteById(itemId);
-            return item.get();
-        }
-        return null;
+        System.out.println("Service calling deleteItem ==>");
+        findCategory(categoryId);
+        Item item = itemRepository.findByIdAndCategoryId(itemId, categoryId)
+                .orElseThrow(() -> new InformationNotFoundException(
+                        "Item with id " + itemId + " not found in category " + categoryId));
+
+        itemRepository.delete(item);
+        return item;
     }
 
     // 5. update
     public Item updateItem(Long categoryId, Long itemId, Item itemObject) {
-        System.out.println("service calling updateItem ==>");
-        Optional<Item> item = itemRepository.findById(itemId);
-        if (item.isPresent()) {
-            Item existingItem = item.get();
-            existingItem.setName(itemObject.getName());
-            existingItem.setDescription(itemObject.getDescription());
-            existingItem.setDueDate(itemObject.getDueDate());
-            return itemRepository.save(existingItem);
-        }
-        return null;
+        System.out.println("Service calling updateItem ==>");
+        findCategory(categoryId);
+        Item existingItem = itemRepository.findByIdAndCategoryId(itemId, categoryId)
+                .orElseThrow(() -> new InformationNotFoundException(
+                        "Item with id " + itemId + " not found in category " + categoryId));
+
+        existingItem.setName(itemObject.getName());
+        existingItem.setDescription(itemObject.getDescription());
+        existingItem.setDueDate(itemObject.getDueDate());
+        return itemRepository.save(existingItem);
     }
 }

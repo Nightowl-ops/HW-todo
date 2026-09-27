@@ -1,6 +1,6 @@
-// File: src/main/java/com/ga/todo/model/Category.java
 package com.ga.todo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -24,21 +24,23 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    
     private String name;
 
     @Column
     private String description;
 
     @CreatedDate
-
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "category", orphanRemoval = true, cascade = CascadeType.ALL)
-    @ToString.Exclude // prevents recursive toString loop
+    @ToString.Exclude
     private List<Item> itemList;
+
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }

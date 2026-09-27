@@ -14,3 +14,10 @@ GET Item By ID: http://localhost:8089/api/categories/{categoryId}/items/{itemId}
 PUT Update Item: http://localhost:8089/api/categories/{categoryId}/items/{itemId}
 
 DELETE Delete Item: http://localhost:8089/api/categories/{categoryId}/items/{itemId}
+
+
+GET Hello this is the health check: http://localhost:8089/hello
+
+POST Register User: http://localhost:8089/auth/users/register
+
+POST Login User: http://localhost:8089/auth/users/login
