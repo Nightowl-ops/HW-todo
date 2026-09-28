@@ -3,6 +3,7 @@ package com.ga.todo.service;
 import com.ga.todo.exceptions.InformationNotFoundException;
 import com.ga.todo.model.Category;
 import com.ga.todo.model.Item;
+import com.ga.todo.model.User;
 import com.ga.todo.repository.CategoryRepository;
 import com.ga.todo.repository.ItemRepository;
 import lombok.AllArgsConstructor;
@@ -18,12 +19,15 @@ public class ItemService {
     private CategoryRepository categoryRepository;
 
     private Category findCategory(Long categoryId) {
-        return categoryRepository.findById(categoryId).orElseThrow(
-                () -> new InformationNotFoundException("Category with id " + categoryId + " not found")
-        );
+        User user = CategoryService.getCurrentLoggedInUser();
+        Category category = categoryRepository.findByIdAndUserId(categoryId, user.getId());
+        if (category == null) {
+            throw new InformationNotFoundException("Category with id " + categoryId + " not found");
+        }
+        return category;
     }
 
-    // 1. create
+    // 1. Create item in category
     public Item createItem(Long categoryId, Item item) {
         System.out.println("Service calling createItem ==>");
         Category category = findCategory(categoryId);
@@ -31,14 +35,14 @@ public class ItemService {
         return itemRepository.save(item);
     }
 
-    // 2. read all
+    // 2. Read all items in category
     public List<Item> getItems(Long categoryId) {
         System.out.println("Service calling getItems ==>");
         findCategory(categoryId);
         return itemRepository.findByCategoryId(categoryId);
     }
 
-    // 3. read one
+    // 3. Read one item
     public Item getItem(Long categoryId, Long itemId) {
         System.out.println("Service calling getItem ==>");
         findCategory(categoryId);
@@ -47,7 +51,7 @@ public class ItemService {
                         "Item with id " + itemId + " not found in category " + categoryId));
     }
 
-    // 4. delete
+    // 4. Delete item
     public Item deleteItem(Long categoryId, Long itemId) {
         System.out.println("Service calling deleteItem ==>");
         findCategory(categoryId);
@@ -59,7 +63,7 @@ public class ItemService {
         return item;
     }
 
-    // 5. update
+    // 5. Update item
     public Item updateItem(Long categoryId, Long itemId, Item itemObject) {
         System.out.println("Service calling updateItem ==>");
         findCategory(categoryId);

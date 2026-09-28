@@ -1,6 +1,7 @@
 package com.ga.todo.controller;
 
 import com.ga.todo.model.Category;
+import com.ga.todo.security.MyUserDetails;
 import com.ga.todo.service.CategoryService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;

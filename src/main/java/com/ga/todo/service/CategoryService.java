@@ -23,40 +23,52 @@ public class CategoryService {
         return userDetails.getUser();
     }
 
-    // 1. create
+    // 1. Create
     public Category createCategory(Category categoryObject) {
         System.out.println("Service calling createCategory ==>");
-        Category category = categoryRepository.findByName(categoryObject.getName());
+        User user = getCurrentLoggedInUser();
+        Category category = categoryRepository.findByUserIdAndName(user.getId(), categoryObject.getName());
         if (category != null) {
             throw new InformationExistException("Category with name " + category.getName() + " already exists");
         }
-        categoryObject.setUser(CategoryService.getCurrentLoggedInUser());
+        categoryObject.setUser(user);
         return categoryRepository.save(categoryObject);
     }
 
-    // 2. readaall
+    // 2. Read all
     public List<Category> getCategories() {
         System.out.println("Service calling getCategories ==>");
-        return categoryRepository.findAll();
+        User user = getCurrentLoggedInUser();
+        return categoryRepository.findByUserId(user.getId());
     }
 
-    // 3. read one
+    // 3. Read one
     public Category getCategory(Long categoryId) {
         System.out.println("Service calling getCategory ==>");
-        return categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new InformationNotFoundException("Category with id " + categoryId + " not found"));
+        User user = getCurrentLoggedInUser();
+        Category category = categoryRepository.findByIdAndUserId(categoryId, user.getId());
+        if (category == null) {
+            throw new InformationNotFoundException("Category with id " + categoryId + " not found");
+        }
+        return category;
     }
-
-    // 4. uupdate
+    // 4. Update
     public Category updateCategory(Long categoryId, Category categoryObject) {
         System.out.println("Service calling updateCategory ==>");
         Category category = getCategory(categoryId);
+
+
+        if (!category.getName().equalsIgnoreCase(categoryObject.getName()) &&
+                categoryRepository.findByUserIdAndName(getCurrentLoggedInUser().getId(), categoryObject.getName()) != null) {
+            throw new InformationExistException("Category with name " + categoryObject.getName() + " already exists");
+        }
+
         category.setName(categoryObject.getName());
         category.setDescription(categoryObject.getDescription());
         return categoryRepository.save(category);
     }
 
-    // 5. delete
+    // 5. Delete
     public Category deleteCategory(Long categoryId) {
         System.out.println("Service calling deleteCategory ==>");
         Category category = getCategory(categoryId);
